@@ -151,6 +151,8 @@ SUBHOOK_EXPORT int SUBHOOK_API subhook_disasm(void *src, int *reloc_op_offset) {
     /* FLD m32fp         */ {0xD9, 0, MODRM | REG_OPCODE},
     /* FLD m64fp         */ {0xDD, 0, MODRM | REG_OPCODE},
     /* FLD m80fp         */ {0xDB, 5, MODRM | REG_OPCODE},
+    /* INC r/m32         */ {0xFF, 0, MODRM | REG_OPCODE},
+    /* INC r32           */ {0x40, 0, PLUS_R},
     /* INT 3             */ {0xCC, 0, 0},
     /* JMP rel32         */ {0xE9, 0, IMM32 | RELOC},
     /* JMP r/m32         */ {0xFF, 4, MODRM | REG_OPCODE},
@@ -243,6 +245,13 @@ SUBHOOK_EXPORT int SUBHOOK_API subhook_disasm(void *src, int *reloc_op_offset) {
     }
   }
 #endif
+
+  if (code[len] == 0x0F) {
+    switch (code[len + 1]) {
+      /* RDTSC */ case 0x31:
+        return len + 2;
+    }
+  }
 
   for (i = 0; i < sizeof(opcodes) / sizeof(*opcodes); i++) {
     if (code[len] == opcodes[i].opcode) {
